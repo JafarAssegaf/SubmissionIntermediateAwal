@@ -1,55 +1,30 @@
 package com.jafar.submissionintermediateawal.data.repository
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.google.gson.Gson
-import com.jafar.submissionintermediateawal.data.remote.response.ErrorResponse
 import com.jafar.submissionintermediateawal.data.remote.retrofit.ApiService
 import com.jafar.submissionintermediateawal.utils.preferences.UserPreferences
-import com.jafar.submissionintermediateawal.utils.result.Result
-import retrofit2.HttpException
+import kotlinx.coroutines.flow.Flow
 
 class AuthenticationRepository private constructor(
     private val apiService: ApiService,
     private val preferences: UserPreferences
 ){
 
-    private val resultRegister = MutableLiveData<Result<String?>>()
-    private val resultLogin = MutableLiveData<Result<String?>>()
+    suspend fun finalRegisterUser(name: String, email: String, password: String) =
+        apiService.register(name, email, password)
 
-    suspend fun registerUser(name: String, email: String, password: String): LiveData<Result<String?>> {
-        try {
-            resultRegister.value = Result.Loading
-            val response = apiService.register(name, email, password)
-            val messageSuccess = response.message
-            resultRegister.value = Result.Success(messageSuccess)
-        } catch (e: HttpException) {
-            val jsonInString = e.response()?.errorBody()?.string()
-            val errorBody = Gson().fromJson(jsonInString, ErrorResponse::class.java)
-            val errorMessage = errorBody.message
-            resultRegister.value = Result.Error(errorMessage.toString())
-        }
-        return resultRegister
+    suspend fun finalLoginUser(name: String, email: String) =
+        apiService.login(name, email)
+
+    suspend fun setUserToken(token: String) {
+        preferences.saveUserToken(token)
     }
 
-    suspend fun loginUser(email: String, password: String): LiveData<Result<String?>> {
-        try {
-            resultLogin.value = Result.Loading
-            val response = apiService.login(email, password)
-            val messageSuccess = response.message
+    fun getUserToken(): Flow<String> {
+        return preferences.getUserToken()
+    }
 
-            val userTokenLogin = response.loginResult?.token
-            if (userTokenLogin != null) {
-                preferences.saveUserToken(userTokenLogin)
-            }
-            resultLogin.value = Result.Success(messageSuccess)
-        } catch (e: HttpException) {
-            val jsonInString = e.response()?.errorBody()?.string()
-            val errorBody = Gson().fromJson(jsonInString, ErrorResponse::class.java)
-            val errorMessage = errorBody.message
-            resultLogin.value = Result.Error(errorMessage.toString())
-        }
-        return resultLogin
+    suspend fun clearToken() {
+        preferences.clearToken()
     }
 
     companion object {
@@ -61,7 +36,9 @@ class AuthenticationRepository private constructor(
                 INSTANCE ?: AuthenticationRepository(
                     apiService,
                     preferences
-                )
+                ).also {
+                    INSTANCE = it
+                }
             }
         }
     }

@@ -7,13 +7,11 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.jafar.submissionintermediateawal.databinding.ActivityLoginBinding
 import com.jafar.submissionintermediateawal.ui.ViewModelFactory
 import com.jafar.submissionintermediateawal.ui.home.HomeActivity
 import com.jafar.submissionintermediateawal.ui.register.RegisterActivity
 import com.jafar.submissionintermediateawal.utils.result.Result
-import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
@@ -45,23 +43,21 @@ class LoginActivity : AppCompatActivity() {
             }
 
             if (!isEmptyField) {
-                lifecycleScope.launch {
-                    loginViewModel.loginUser(email, password).observe(this@LoginActivity) { result ->
-                        if (result != null) {
-                            when (result) {
-                                is Result.Loading -> {
-                                    showLoading(true)
-                                }
-                                is Result.Success -> {
-                                    showLoading(false)
-                                    val intentToHome = Intent(this@LoginActivity, HomeActivity::class.java)
-                                    startActivity(intentToHome)
-                                }
-                                is Result.Error -> {
-                                    showLoading(false)
-                                    showAlert(this@LoginActivity, result.error)
-                                    clearInput()
-                                }
+                loginViewModel.finalLoginUser(email, password)
+                loginViewModel.loginState.observe(this) { result ->
+                    if (result != null) {
+                        when (result) {
+                            is Result.Loading -> {
+                                showLoading(true)
+                            }
+                            is Result.Success -> {
+                                showLoading(false)
+                                showAlert(this, result.data.toString(), true)
+                            }
+                            is Result.Error -> {
+                                showLoading(false)
+                                showAlert(this, result.error, false)
+                                clearInput()
                             }
                         }
                     }
@@ -75,12 +71,15 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun showAlert(context: Context, message: String) {
+    private fun showAlert(context: Context, message: String, isSuccess: Boolean) {
         val alert = AlertDialog.Builder(context)
-        alert.setTitle("Yahh :(")
+        alert.setTitle("Login")
         alert.setMessage(message)
         alert.setPositiveButton("OK") { dialog, _ ->
-            dialog.dismiss()
+            if (isSuccess)
+                startActivity(Intent(context, HomeActivity::class.java))
+            else
+                dialog.dismiss()
         }
         val dialog = alert.create()
         dialog.show()

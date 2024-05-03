@@ -7,12 +7,10 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.jafar.submissionintermediateawal.databinding.ActivityRegisterBinding
 import com.jafar.submissionintermediateawal.ui.ViewModelFactory
 import com.jafar.submissionintermediateawal.ui.login.LoginActivity
 import com.jafar.submissionintermediateawal.utils.result.Result
-import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -28,6 +26,10 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.tvToRegister.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
 
         binding.btnRegister.setOnClickListener {
             name = binding.edRegisterNama.text.toString().trim()
@@ -51,21 +53,20 @@ class RegisterActivity : AppCompatActivity() {
             }
 
             if (!isEmptyField) {
-                lifecycleScope.launch {
-                    registerViewModel.registerUser(name, email, password).observe(this@RegisterActivity) { result ->
-                        if (result != null) {
-                            when (result) {
-                                is Result.Loading -> {
-                                    showLoading(true)
-                                }
-                                is Result.Success -> {
-                                    showLoading(false)
-                                    showAlert(this@RegisterActivity, result.data.toString(),true)
-                                }
-                                is Result.Error -> {
-                                    showLoading(false)
-                                    showAlert(this@RegisterActivity, result.error, false)
-                                }
+                registerViewModel.finalRegisterUser(name, email, password)
+                registerViewModel.registerState.observe(this) { result ->
+                    if (result != null) {
+                        when (result) {
+                            is Result.Loading -> {
+                                showLoading(true)
+                            }
+                            is Result.Success -> {
+                                showLoading(false)
+                                showAlert(this, result.data.toString(), true)
+                            }
+                            is Result.Error -> {
+                                showLoading(false)
+                                showAlert(this, result.error, false)
                             }
                         }
                     }

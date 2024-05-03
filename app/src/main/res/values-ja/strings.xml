@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dicoding Story</string>
+    <string name="email">Eメール</string>
+    <string name="password">パスワード</string>
+    <string name="masuk">ログイン</string>
+    <string name="title">すでにスキルをアップグレードしていますか?</string>
+    <string name="opening_message">データを入力してください</string>
+    <string name="belum_punya_akun">まだアカウントをお持ちではありませんか?</string>
+    <string name="daftar_akun">ここに登録！</string>
+    <string name="opening_image">オープニング映像</string>
+    <string name="nama">名前</string>
+    <string name="daftar">登録する</string>
+    <string name="sudah_punya_akun">すでにアカウントをお持ちですか?</string>
+    <string name="login_akun_disini">ここでログイン</string>
+    <string name="logout">ログアウト</string>
+    <string name="camera">カメラ</string>
+    <string name="gallery">ギャラリー</string>
+    <string name="description">説明</string>
+    <string name="upload">アップロード</string>
+    <string name="null_data">いや、あなたのデータは空です:(</string>
+</resources>

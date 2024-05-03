@@ -27,7 +27,7 @@ class ViewModelFactory private constructor(
         } else if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
             return LoginViewModel(authenticationRepository) as T
         } else if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            return HomeViewModel(storyRepository, preferences) as T
+            return HomeViewModel(storyRepository, preferences, authenticationRepository) as T
         } else if (modelClass.isAssignableFrom(DetailViewModel::class.java)) {
             return DetailViewModel(storyRepository) as T
         } else if (modelClass.isAssignableFrom(AddStoryViewModel::class.java)) {
@@ -46,7 +46,9 @@ class ViewModelFactory private constructor(
                     Injection.provideAuthRepository(context),
                     Injection.provideStoryRepository(context),
                     UserPreferences.getInstance(context.dataStore)
-                )
+                ).also {
+                    INSTANCE = it
+                }
             }
         }
     }

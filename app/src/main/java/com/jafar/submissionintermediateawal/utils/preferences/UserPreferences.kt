@@ -14,9 +14,6 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "to
 class UserPreferences private constructor(
     private val dataStore: DataStore<Preferences>
 ) {
-
-    private val TOKEN_KEY = stringPreferencesKey("token_user")
-
     fun getUserToken(): Flow<String> {
         return dataStore.data.map { preferences ->
             preferences[TOKEN_KEY] ?: ""
@@ -29,15 +26,23 @@ class UserPreferences private constructor(
         }
     }
 
+    suspend fun clearToken() = dataStore.edit {
+        it.clear()
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: UserPreferences? = null
+
+        private val TOKEN_KEY = stringPreferencesKey("token")
 
         fun getInstance(dataStore: DataStore<Preferences>): UserPreferences {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: UserPreferences(
                     dataStore
-                )
+                ).also {
+                    INSTANCE = it
+                }
             }
         }
     }
